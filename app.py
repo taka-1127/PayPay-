@@ -3,6 +3,11 @@ import os
 import json
 import requests
 import psycopg2 
+# import os 
+# import threading
+# from http.server import BaseHTTPRequestHandler, HTTPServer
+import threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse
 from typing import List, Dict, Any
 
@@ -26,6 +31,25 @@ except ImportError:
         def alive(self):
             print("ダミー: alive 実行")
 
+
+
+# Renderが提供する環境変数PORTがあればそれを使用し、なければ8000を使用
+PORT = int(os.environ.get("PORT", 8000))
+
+class HealthCheckHandler(BaseHTTPRequestHandler):
+    """Renderのヘルスチェックに応答するためのシンプルなハンドラー"""
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        self.wfile.write(b"Bot is alive!")
+
+def run_web_server():
+    """バックグラウンドでダミーのWebサーバーを実行する"""
+    server_address = ('0.0.0.0', PORT)
+    httpd = HTTPServer(server_address, HealthCheckHandler)
+    print(f"Starting dummy web server on port {PORT} for Render health check.")
+    httpd.serve_forever()
 
 # --- Discordクライアントとコマンドツリーの設定 ---
 intents = discord.Intents.default()
@@ -372,6 +396,12 @@ async def handle_button(interaction: discord.Interaction, label: str):
     else:
         # 他のボタン処理
         await interaction.followup.send(f"ボタン **{label}** の処理は未実装です。PayPaython_mobile に対応するロジックを実装してください。", ephemeral=True)
+
+if __name__ == "__main__":
+    # Webサーバーを別スレッドで起動
+    web_thread = threading.Thread(target=run_web_server)
+    web_thread.daemon = True # メインスレッドが終了したら一緒に終了する
+    web_thread.start()
 
 # --- ボットの実行 ---
 
