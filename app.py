@@ -225,7 +225,7 @@ async def on_ready():
     # Discordプレゼンスとコマンドの同期
     await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name='paypay管理'))
     print(client.user)
-    await tree.sync()
+    await tree.sync() # ← この行が重要
 
 
 # --- Discordスラッシュコマンド ---
