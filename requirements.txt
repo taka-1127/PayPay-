@@ -4,7 +4,6 @@ pyotp
 tls-client
 discord
 pyyaml
-pickle
 datetime
 PayPaython-mobile
 psycopg2-binary
